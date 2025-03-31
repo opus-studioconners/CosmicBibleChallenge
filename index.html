@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Bible Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Grotesk:wght@300;400;700&display=swap');
+        
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0f0f1a;
+            color: var(--light);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(108, 92, 231, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 206, 201, 0.1) 0%, transparent 20%);
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .glow {
+            text-shadow: 0 0 10px rgba(108, 92, 231, 0.7);
+        }
+        
+        .btn-glow {
+            box-shadow: 0 0 15px rgba(108, 92, 231, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-glow:hover {
+            box-shadow: 0 0 25px rgba(108, 92, 231, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        .option-btn {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .option-btn:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+        }
+        
+        .correct {
+            background-color: rgba(0, 206, 201, 0.3) !important;
+            border-color: var(--secondary) !important;
+        }
+        
+        .wrong {
+            background-color: rgba(253, 121, 168, 0.3) !important;
+            border-color: var(--accent) !important;
+        }
+        
+        .score-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .neon-border {
+            position: relative;
+        }
+        
+        .neon-border::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid transparent;
+            border-image: linear-gradient(45deg, var(--primary), var(--secondary)) 1;
+            pointer-events: none;
+        }
+        
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, white, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, white, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 160px, white, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, white, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, white, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 160px 120px, white, rgba(0,0,0,0));
+            background-repeat: repeat;
+            animation: moveStars 100s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes moveStars {
+            from { transform: translateY(0); }
+            to { transform: translateY(-1000px); }
+        }
+        
+        .ship {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%236c5ce7" d="M50,10 L70,50 L50,70 L30,50 Z"/><path fill="%2300cec9" d="M50,60 L55,80 L45,80 Z"/></svg>') no-repeat;
+            filter: drop-shadow(0 0 10px rgba(108, 92, 231, 0.7));
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+            25% { transform: translate(10px, 15px) rotate(5deg); }
+            50% { transform: translate(-5px, 20px) rotate(-5deg); }
+            75% { transform: translate(15px, 10px) rotate(5deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="stars"></div>
+    <div class="ship" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+    <div class="ship" style="top: 70%; left: 85%; animation-delay: 2s; transform: scale(0.7) rotate(180deg);"></div>
+    
+    <div class="container mx-auto max-w-4xl backdrop-blur-sm bg-black/40 rounded-xl p-8 neon-border relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-teal-900/20 rounded-xl pointer-events-none"></div>
+        
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 glow">Cosmic Bible Challenge</h1>
+            <p class="text-lg text-indigo-300">Test your knowledge of Scripture among the stars</p>
+        </header>
+        
+        <main>
+            <!-- Start Screen -->
+            <div id="start-screen" class="text-center">
+                <div class="mb-8">
+                    <i class="fas fa-bible text-6xl mb-4 text-indigo-400"></i>
+                    <h2 class="text-2xl mb-4">How well do you know the Bible?</h2>
+                    <p class="max-w-lg mx-auto mb-8 text-indigo-200">Answer questions correctly to climb the leaderboard. One wrong answer ends your journey!</p>
+                </div>
+                <button id="start-btn" class="btn-glow bg-gradient-to-r from-indigo-600 to-teal-500 text-white py-3 px-8 rounded-full font-bold text-lg">
+                    Begin Mission <i class="fas fa-rocket ml-2"></i>
+                </button>
+            </div>
+            
+            <!-- Game Screen -->
+            <div id="game-screen" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <div class="text-lg">
+                        <span class="text-indigo-300">Question:</span> 
+                        <span id="question-count" class="font-bold">1</span>
+                    </div>
+                    <div class="score-pulse bg-indigo-900/50 px-4 py-2 rounded-full">
+                        <span class="text-indigo-300">Score:</span> 
+                        <span id="score" class="font-bold">0</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-b from-indigo-900/30 to-teal-900/30 p-6 rounded-lg mb-8 min-h-32 flex items-center">
+                    <p id="question-text" class="text-xl text-center w-full"></p>
+                </div>
+                
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <!-- Options will be inserted here -->
+                </div>
+                
+                <div id="feedback" class="hidden text-center py-4 px-6 rounded-lg mb-4">
+                    <p id="feedback-text" class="text-lg"></p>
+                </div>
+                
+                <div id="continue-area" class="hidden text-center">
+                    <button id="continue-btn" class="btn-glow bg-gradient-to-r from-indigo-600 to-teal-500 text-white py-3 px-8 rounded-full font-bold text-lg">
+                        Next Question <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- End Screen -->
+            <div id="end-screen" class="hidden text-center">
+                <div class="mb-8">
+                    <i class="fas fa-star text-6xl mb-4 text-yellow-400"></i>
+                    <h2 class="text-3xl mb-4 glow">Mission Complete!</h2>
+                    <div id="final-score" class="text-4xl font-bold mb-8 text-indigo-400">Score: 0</div>
+                    <p id="score-message" class="text-lg mb-8 max-w-lg mx-auto text-indigo-200"></p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                    <button id="play-again-btn" class="btn-glow bg-gradient-to-r from-indigo-600 to-teal-500 text-white py-3 px-6 rounded-full font-bold flex-1 max-w-xs mx-auto">
+                        <i class="fas fa-redo mr-2"></i> Play Again
+                    </button>
+                    
+                    <div class="relative group">
+                        <button id="export-btn" class="btn-glow bg-gradient-to-r from-purple-600 to-pink-500 text-white py-3 px-6 rounded-full font-bold flex-1 max-w-xs mx-auto">
+                            <i class="fas fa-share-alt mr-2"></i> Export Score
+                        </button>
+                        <div class="absolute hidden group-hover:block bg-indigo-900/90 p-3 rounded-lg shadow-xl z-20 left-1/2 transform -translate-x-1/2 mt-2 w-48">
+                            <button id="export-copy" class="w-full text-left py-2 px-3 hover:bg-indigo-700 rounded">
+                                <i class="fas fa-clipboard mr-2"></i> Copy to Clipboard
+                            </button>
+                            <button id="export-email" class="w-full text-left py-2 px-3 hover:bg-indigo-700 rounded">
+                                <i class="fas fa-envelope mr-2"></i> Email
+                            </button>
+                            <button id="export-pdf" class="w-full text-left py-2 px-3 hover:bg-indigo-700 rounded">
+                                <i class="fas fa-file-pdf mr-2"></i> Download PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="leaderboard" class="mt-8 max-w-md mx-auto hidden">
+                    <h3 class="text-xl mb-4 text-indigo-300">Recent High Scores</h3>
+                    <div class="bg-indigo-900/30 rounded-lg p-4">
+                        <ul id="scores-list" class="divide-y divide-indigo-700/50">
+                            <!-- Scores will be inserted here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer class="mt-8 text-center text-indigo-400 text-sm">
+        <p>Cosmic Bible Challenge © 2023 | May the Word guide your journey</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const startScreen = document.getElementById('start-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const endScreen = document.getElementById('end-screen');
+            const startBtn = document.getElementById('start-btn');
+            const playAgainBtn = document.getElementById('play-again-btn');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const feedback = document.getElementById('feedback');
+            const feedbackText = document.getElementById('feedback-text');
+            const continueBtn = document.getElementById('continue-btn');
+            const continueArea = document.getElementById('continue-area');
+            const questionCount = document.getElementById('question-count');
+            const scoreDisplay = document.getElementById('score');
+            const finalScore = document.getElementById('final-score');
+            const scoreMessage = document.getElementById('score-message');
+            const leaderboard = document.getElementById('leaderboard');
+            const scoresList = document.getElementById('scores-list');
+            
+            // Export buttons
+            const exportBtn = document.getElementById('export-btn');
+            const exportCopy = document.getElementById('export-copy');
+            const exportEmail = document.getElementById('export-email');
+            const exportPdf = document.getElementById('export-pdf');
+            
+            // Game variables
+            let currentQuestionIndex = 0;
+            let score = 0;
+            let currentQuestion = {};
+            let questions = [];
+            let selectedOption = null;
+            let highScores = JSON.parse(localStorage.getItem('cosmicBibleHighScores')) || [];
+            
+            // Bible Questions
+            const bibleQuestions = [
+                {
+                    question: "What was the name of the garden where Adam and Eve lived?",
+                    options: ["Garden of Eden", "Garden of Gethsemane", "Garden of Babylon", "Garden of Paradise"],
+                    answer: 0,
+                    reference: "Genesis 2:8"
+                },
+                {
+                    question: "Who was thrown into a lions' den but survived unharmed?",
+                    options: ["David", "Daniel", "Samson", "Jonah"],
+                    answer: 1,
+                    reference: "Daniel 6:16-23"
+                },
+                {
+                    question: "How many days and nights did Jesus fast in the wilderness?",
+                    options: ["7", "21", "40", "3"],
+                    answer: 2,
+                    reference: "Matthew 4:2"
+                },
+                {
+                    question: "What did Jesus turn water into at the wedding in Cana?",
+                    options: ["Oil", "Milk", "Wine", "Honey"],
+                    answer: 2,
+                    reference: "John 2:1-11"
+                },
+                {
+                    question: "Who was the first martyr of the Christian church?",
+                    options: ["Peter", "Paul", "Stephen", "John"],
+                    answer: 2,
+                    reference: "Acts 7:54-60"
+                },
+                {
+                    question: "What was the name of Abraham's wife?",
+                    options: ["Rebekah", "Rachel", "Sarah", "Leah"],
+                    answer: 2,
+                    reference: "Genesis 17:15"
+                },
+                {
+                    question: "How many books are in the New Testament?",
+                    options: ["27", "39", "66", "12"],
+                    answer: 0,
+                    reference: ""
+                },
+                {
+                    question: "Who wrote most of the epistles in the New Testament?",
+                    options: ["Peter", "Paul", "John", "James"],
+                    answer: 1,
+                    reference: ""
+                },
+                {
+                    question: "What famous structure was built in Genesis 11?",
+                    options: ["The Great Wall", "The Titanic", "The Tower of Babel", "Noah's Ark"],
+                    answer: 2,
+                    reference: "Genesis 11:1-9"
+                },
+                {
+                    question: "Which prophet was swallowed by a great fish?",
+                    options: ["Jeremiah", "Isaiah", "Jonah", "Ezekiel"],
+                    answer: 2,
+                    reference: "Jonah 1:17"
+                }
+            ];
+            
+            // Initialize game
+            function initGame() {
+                score = 0;
+                currentQuestionIndex = 0;
+                scoreDisplay.textContent = score;
+                
+                // Shuffle questions to make the game more interesting
+                questions = [...bibleQuestions];
+                shuffleArray(questions);
+                
+                showStartScreen();
+            }
+            
+            // Helper function to shuffle array
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+            
+            // Screen management
+            function showStartScreen() {
+                startScreen.classList.remove('hidden');
+                gameScreen.classList.add('hidden');
+                endScreen.classList.add('hidden');
+            }
+            
+            function showGameScreen() {
+                startScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                endScreen.classList.add('hidden');
+                loadQuestion();
+            }
+            
+            function showEndScreen() {
+                startScreen.classList.add('hidden');
+                gameScreen.classList.add('hidden');
+                endScreen.classList.remove('hidden');
+                
+                finalScore.textContent = `Score: ${score}`;
+                
+                // Add score to high scores if it's in the top 5
+                highScores.push(score);
+                highScores.sort((a, b) => b - a);
+                highScores = highScores.slice(0, 5);
+                localStorage.setItem('cosmicBibleHighScores', JSON.stringify(highScores));
+                
+                // Show appropriate message based on score
+                if (score >= 8) {
+                    scoreMessage.textContent = "Celestial knowledge! You're a Bible master!";
+                } else if (score >= 5) {
+                    scoreMessage.textContent = "Good job! Your biblical knowledge is rising!";
+                } else {
+                    scoreMessage.textContent = "Keep studying! The Word is your guide to success.";
+                }
+                
+                // Display leaderboard
+                displayLeaderboard();
+            }
+            
+            function displayLeaderboard() {
+                if (highScores.length > 0) {
+                    leaderboard.classList.remove('hidden');
+                    scoresList.innerHTML = '';
+                    
+                    highScores.forEach((score, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'py-2 flex justify-between';
+                        listItem.innerHTML = `
+                            <span>${index + 1}. <i class="fas fa-user-astronaut mr-2"></i>Explorer</span>
+                            <span class="font-bold">${score}</span>
+                        `;
+                        scoresList.appendChild(listItem);
+                    });
+                }
+            }
+            
+            // Question handling
+            function loadQuestion() {
+                if (currentQuestionIndex >= questions.length) {
+                    currentQuestionIndex = 0;
+                    shuffleArray(questions); // Shuffle again if we've gone through all questions
+                }
+                
+                continueArea.classList.add('hidden');
+                feedback.classList.add('hidden');
+                
+                currentQuestion = questions[currentQuestionIndex];
+                questionText.textContent = currentQuestion.question;
+                questionCount.textContent = currentQuestionIndex + 1;
+                
+                // Clear previous options
+                optionsContainer.innerHTML = '';
+                
+                // Create and append new options
+                currentQuestion.options.forEach((option, index) => {
+                    const optionBtn = document.createElement('button');
+                    optionBtn.className = 'option-btn bg-indigo-800/30 hover:bg-indigo-700/50 text-white py-4 px-6 rounded-lg text-left transition-all duration-300';
+                    optionBtn.textContent = option;
+                    optionBtn.dataset.index = index;
+                    optionBtn.addEventListener('click', selectOption);
+                    optionsContainer.appendChild(optionBtn);
+                });
+            }
+            
+            function selectOption(e) {
+                if (feedback.classList.contains('hidden')) {
+                    const selectedIndex = parseInt(e.target.dataset.index);
+                    selectedOption = e.target;
+                    
+                    // Disable all options
+                    const options = optionsContainer.querySelectorAll('button');
+                    options.forEach(option => {
+                        option.classList.add('opacity-70');
+                        option.disabled = true;
+                    });
+                    
+                    // Highlight selected option
+                    if (selectedIndex === currentQuestion.answer) {
+                        selectedOption.classList.add('correct');
+                        score++;
+                        scoreDisplay.textContent = score;
+                        
+                        feedback.className = 'block bg-teal-900/30 text-teal-300 text-center py-4 px-6 rounded-lg mb-4';
+                        feedbackText.textContent = `Correct! (${currentQuestion.reference || 'Reference not available'})`;
+                        
+                        // Move to next question after delay
+                        setTimeout(() => {
+                            currentQuestionIndex++;
+                            loadQuestion();
+                        }, 2000);
+                    } else {
+                        selectedOption.classList.add('wrong');
+                        
+                        // Highlight correct answer
+                        options[currentQuestion.answer].classList.add('correct');
+                        
+                        feedback.className = 'block bg-pink-900/30 text-pink-300 text-center py-4 px-6 rounded-lg mb-4';
+                        feedbackText.textContent = `Incorrect. The correct answer is: ${currentQuestion.options[currentQuestion.answer]} (${currentQuestion.reference || 'Reference not available'})`;
+                        
+                        // Show end screen after delay
+                        setTimeout(showEndScreen, 3000);
+                    }
+                    
+                    feedback.classList.remove('hidden');
+                }
+            }
+            
+            // Export functions
+            function copyToClipboard() {
+                const scoreText = `I scored ${score} points in Cosmic Bible Challenge!\nCan you beat my score?`;
+                navigator.clipboard.writeText(scoreText).then(() => {
+                    alert('Score copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+            
+            function emailScore() {
+                const subject = 'My Cosmic Bible Challenge Score';
+                const body = `I scored ${score} points in Cosmic Bible Challenge!\nCan you beat my score?`;
+                window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            }
+            
+            function downloadPdf() {
+                // In a real app, this would generate a PDF with more details
+                // For this demo, we'll simulate it with a text file
+                const content = `Cosmic Bible Challenge Score Report\n\nScore: ${score}\n\nKeep studying God's Word!`;
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cosmic-bible-score.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            
+            // Event listeners
+            startBtn.addEventListener('click', showGameScreen);
+            playAgainBtn.addEventListener('click', initGame);
+            continueBtn.addEventListener('click', () => {
+                currentQuestionIndex++;
+                loadQuestion();
+            });
+            
+            // Export functionality
+            exportCopy.addEventListener('click', copyToClipboard);
+            exportEmail.addEventListener('click', emailScore);
+            exportPdf.addEventListener('click', downloadPdf);
+            
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+</html>
